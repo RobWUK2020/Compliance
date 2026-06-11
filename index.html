@@ -1,0 +1,789 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FlyDubai Crew Compliance LMS</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #003d6b 0%, #005a96 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            overflow: hidden;
+        }
+
+        /* Header */
+        .header {
+            background: linear-gradient(135deg, #003d6b 0%, #005a96 100%);
+            color: white;
+            padding: 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+
+        .crew-info h1 {
+            font-size: 24px;
+            margin-bottom: 5px;
+        }
+
+        .crew-info p {
+            font-size: 14px;
+            opacity: 0.9;
+        }
+
+        .compliance-status {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 15px 25px;
+            border-radius: 8px;
+            text-align: right;
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: bold;
+            margin-top: 5px;
+        }
+
+        .status-compliant {
+            background: #4caf50;
+            color: white;
+        }
+
+        .status-warning {
+            background: #ff9800;
+            color: white;
+        }
+
+        .status-critical {
+            background: #f44336;
+            color: white;
+        }
+
+        /* Dashboard */
+        .dashboard {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            padding: 30px;
+            background: #f5f5f5;
+        }
+
+        .stat-card {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            text-align: center;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .stat-number {
+            font-size: 32px;
+            font-weight: bold;
+            color: #ff9500;
+            margin-bottom: 5px;
+        }
+
+        .stat-label {
+            font-size: 12px;
+            color: #666;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        /* Controls */
+        .controls {
+            padding: 20px 30px;
+            background: white;
+            border-bottom: 1px solid #eee;
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
+        .search-box {
+            flex: 1;
+            min-width: 200px;
+            padding: 10px 15px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 14px;
+        }
+
+        .filter-select {
+            padding: 10px 15px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 14px;
+            background: white;
+            cursor: pointer;
+        }
+
+        /* Training List */
+        .training-list {
+            padding: 20px 30px;
+        }
+
+        .training-item {
+            background: white;
+            border: 1px solid #eee;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 15px;
+            display: grid;
+            grid-template-columns: 1fr auto auto;
+            gap: 20px;
+            align-items: center;
+            transition: all 0.3s ease;
+            border-left: 4px solid #ff9500;
+        }
+
+        .training-item:hover {
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+        }
+
+        .training-item.overdue {
+            border-left-color: #f44336;
+            background: #fff5f5;
+        }
+
+        .training-item.warning {
+            border-left-color: #ff9800;
+            background: #fffbf0;
+        }
+
+        .training-item.current {
+            border-left-color: #4caf50;
+            background: #f5fdf5;
+        }
+
+        .training-details h3 {
+            font-size: 16px;
+            margin-bottom: 8px;
+            color: #1a1a2e;
+        }
+
+        .training-meta {
+            display: flex;
+            gap: 20px;
+            flex-wrap: wrap;
+            font-size: 13px;
+            color: #666;
+            margin-top: 8px;
+        }
+
+        .training-type {
+            background: #f0f0f0;
+            padding: 3px 8px;
+            border-radius: 4px;
+            font-size: 11px;
+            font-weight: bold;
+            color: #333;
+        }
+
+        .training-status {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .status-indicator {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+            gap: 5px;
+        }
+
+        .status-label {
+            font-size: 12px;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .status-complete {
+            color: #4caf50;
+        }
+
+        .status-due-soon {
+            color: #ff9800;
+        }
+
+        .status-overdue {
+            color: #f44336;
+        }
+
+        .status-not-started {
+            color: #999;
+        }
+
+        .action-button {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .btn-complete {
+            background: #4caf50;
+            color: white;
+        }
+
+        .btn-complete:hover {
+            background: #45a049;
+        }
+
+        .btn-schedule {
+            background: #ff9800;
+            color: white;
+        }
+
+        .btn-schedule:hover {
+            background: #e68900;
+        }
+
+        .btn-view {
+            background: #005a96;
+            color: white;
+        }
+
+        .btn-view:hover {
+            background: #003d6b;
+        }
+
+        /* Empty State */
+        .empty-state {
+            text-align: center;
+            padding: 60px 30px;
+            color: #999;
+        }
+
+        .empty-state p {
+            font-size: 16px;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .header {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .compliance-status {
+                align-self: flex-start;
+            }
+
+            .training-item {
+                grid-template-columns: 1fr;
+                gap: 15px;
+            }
+
+            .training-status {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .status-indicator {
+                align-items: flex-start;
+            }
+
+            .dashboard {
+                grid-template-columns: 1fr 1fr;
+            }
+
+            .controls {
+                flex-direction: column;
+            }
+
+            .search-box {
+                width: 100%;
+            }
+
+            .filter-select {
+                width: 100%;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .header {
+                padding: 20px;
+            }
+
+            .crew-info h1 {
+                font-size: 18px;
+            }
+
+            .dashboard {
+                grid-template-columns: 1fr;
+            }
+
+            .training-details h3 {
+                font-size: 14px;
+            }
+
+            .training-meta {
+                font-size: 12px;
+            }
+
+            .action-button {
+                width: 100%;
+                padding: 10px;
+            }
+        }
+
+        .legend {
+            display: flex;
+            gap: 20px;
+            flex-wrap: wrap;
+            padding: 15px 30px;
+            background: #f9f9f9;
+            border-top: 1px solid #eee;
+            font-size: 12px;
+            color: #666;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .legend-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 2px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <div class="crew-info">
+                <h1>Patrick Anderson</h1>
+                <p>Employee ID: FD-045821 | Flight Attendant | Base: DXB</p>
+            </div>
+            <div class="compliance-status">
+                <p>Overall Compliance Status</p>
+                <div class="status-badge status-warning" id="overallStatus">
+                    ⚠ ACTION REQUIRED
+                </div>
+            </div>
+        </div>
+
+        <!-- Dashboard Stats -->
+        <div class="dashboard">
+            <div class="stat-card">
+                <div class="stat-number" id="completeCount">12</div>
+                <div class="stat-label">Current & Valid</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="warningCount">3</div>
+                <div class="stat-label">Due Within 30 Days</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="overdueCount">1</div>
+                <div class="stat-label">Overdue</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="totalCount">16</div>
+                <div class="stat-label">Total Requirements</div>
+            </div>
+        </div>
+
+        <!-- Controls -->
+        <div class="controls">
+            <input 
+                type="text" 
+                class="search-box" 
+                id="searchBox" 
+                placeholder="Search training, certifications..."
+            >
+            <select class="filter-select" id="filterSelect">
+                <option value="all">All Training</option>
+                <option value="overdue">Overdue Only</option>
+                <option value="warning">Due Soon</option>
+                <option value="current">Current & Valid</option>
+                <option value="not-started">Not Started</option>
+            </select>
+        </div>
+
+        <!-- Training List -->
+        <div class="training-list" id="trainingList"></div>
+
+        <!-- Legend -->
+        <div class="legend">
+            <div class="legend-item">
+                <div class="legend-dot" style="background: #4caf50;"></div>
+                <span>Current & Valid</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-dot" style="background: #ff9800;"></div>
+                <span>Due Within 30 Days</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-dot" style="background: #f44336;"></div>
+                <span>Overdue</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-dot" style="background: #999;"></div>
+                <span>Not Started</span>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const trainingData = [
+            {
+                id: 1,
+                name: "Cabin Crew License Renewal",
+                type: "Compliance",
+                category: "Certification",
+                status: "warning",
+                lastCompleted: "2023-08-15",
+                dueDate: "2025-08-15",
+                description: "UAE Civil Aviation Authority Cabin Crew License renewal",
+                daysUntilDue: 65
+            },
+            {
+                id: 2,
+                name: "Emergency Evacuation Procedures",
+                type: "Recurrent",
+                category: "Safety",
+                status: "overdue",
+                lastCompleted: "2023-05-10",
+                dueDate: "2024-05-10",
+                description: "Aircraft evacuation and emergency slide procedures"
+            },
+            {
+                id: 3,
+                name: "First Aid & CPR Certification",
+                type: "Compliance",
+                category: "Medical",
+                status: "warning",
+                lastCompleted: "2024-03-10",
+                dueDate: "2025-03-10",
+                description: "International First Aid and CPR certification renewal",
+                daysUntilDue: 272
+            },
+            {
+                id: 4,
+                name: "Aircraft Safety Equipment Training",
+                type: "Recurrent",
+                category: "Safety",
+                status: "current",
+                lastCompleted: "2024-06-01",
+                dueDate: "2025-06-01",
+                description: "Oxygen systems, life jackets, and emergency equipment operation"
+            },
+            {
+                id: 5,
+                name: "Cabin Service Training - Boeing 737",
+                type: "Assessment",
+                category: "Aircraft Type",
+                status: "current",
+                lastCompleted: "2024-05-22",
+                dueDate: "2025-05-22",
+                description: "Cabin layout, galley systems, and in-flight service procedures",
+                score: "94%"
+            },
+            {
+                id: 6,
+                name: "In-Flight Service Standards",
+                type: "Recurrent",
+                category: "Service",
+                status: "current",
+                lastCompleted: "2024-04-18",
+                dueDate: "2025-04-18",
+                description: "FlyDubai service standards and customer satisfaction protocols"
+            },
+            {
+                id: 7,
+                name: "Security Awareness Training (AVSEC)",
+                type: "Compliance",
+                category: "Security",
+                status: "warning",
+                lastCompleted: "2023-10-05",
+                dueDate: "2024-10-05",
+                daysUntilDue: 116,
+                description: "Aviation security threats and prohibited items identification"
+            },
+            {
+                id: 8,
+                name: "Dangerous Goods Handling (HAZMAT)",
+                type: "Compliance",
+                category: "Safety",
+                status: "current",
+                lastCompleted: "2024-02-14",
+                dueDate: "2025-02-14",
+                description: "Safe handling of dangerous goods and restricted items"
+            },
+            {
+                id: 9,
+                name: "Medical Emergency Response",
+                type: "Recurrent",
+                category: "Medical",
+                status: "current",
+                lastCompleted: "2024-03-20",
+                dueDate: "2025-03-20",
+                description: "In-flight medical emergency procedures and communication protocols"
+            },
+            {
+                id: 10,
+                name: "Passenger Assistance & Disabilities Awareness",
+                type: "Compliance",
+                category: "Customer Service",
+                status: "not-started",
+                dueDate: "2024-12-31",
+                description: "Supporting passengers with disabilities and special requirements",
+                daysUntilDue: 203
+            },
+            {
+                id: 11,
+                name: "Beverage & Galley Service Procedures",
+                type: "Initial",
+                category: "Service",
+                status: "current",
+                lastCompleted: "2024-04-01",
+                dueDate: "2025-04-01",
+                description: "Galley operations, beverage service, and food safety procedures"
+            },
+            {
+                id: 12,
+                name: "Customer Service Excellence Program",
+                type: "Recurrent",
+                category: "Customer Service",
+                status: "current",
+                lastCompleted: "2024-06-10",
+                dueDate: "2025-06-10",
+                description: "FlyDubai brand standards and conflict resolution techniques"
+            },
+            {
+                id: 13,
+                name: "English Language Proficiency Test",
+                type: "Assessment",
+                category: "Language",
+                status: "current",
+                lastCompleted: "2024-05-15",
+                dueDate: "2025-05-15",
+                description: "ICAO Level 4 English language proficiency for aviation",
+                score: "Level 4"
+            },
+            {
+                id: 14,
+                name: "Code of Conduct & Company Policy",
+                type: "Compliance",
+                category: "Corporate",
+                status: "current",
+                lastCompleted: "2024-03-01",
+                dueDate: "2025-03-01",
+                description: "FlyDubai code of conduct and company policies acknowledgment"
+            },
+            {
+                id: 15,
+                name: "Fire Fighting & Smoke Detection",
+                type: "Recurrent",
+                category: "Safety",
+                status: "not-started",
+                dueDate: "2024-12-15",
+                description: "In-flight fire detection, suppression equipment, and procedures"
+            },
+            {
+                id: 16,
+                name: "Crew Resource Management (CRM)",
+                type: "Recurrent",
+                category: "Safety",
+                status: "current",
+                lastCompleted: "2024-01-10",
+                dueDate: "2025-01-10",
+                description: "Team coordination, communication, and decision-making protocols"
+            }
+        ];
+
+        let filteredData = [...trainingData];
+
+        function getStatusClass(status) {
+            const statusMap = {
+                'current': 'current',
+                'warning': 'warning',
+                'overdue': 'overdue',
+                'not-started': 'not-started'
+            };
+            return statusMap[status] || status;
+        }
+
+        function getStatusLabel(status) {
+            const labelMap = {
+                'current': '✓ Current',
+                'warning': '⏰ Due Soon',
+                'overdue': '✗ Overdue',
+                'not-started': '○ Not Started'
+            };
+            return labelMap[status] || status;
+        }
+
+        function getButtonLabel(status) {
+            const buttonMap = {
+                'current': 'View Details',
+                'warning': 'Schedule Now',
+                'overdue': 'Complete Immediately',
+                'not-started': 'Start Training'
+            };
+            return buttonMap[status] || 'View Details';
+        }
+
+        function getButtonClass(status) {
+            const classMap = {
+                'current': 'btn-view',
+                'warning': 'btn-schedule',
+                'overdue': 'btn-complete',
+                'not-started': 'btn-schedule'
+            };
+            return classMap[status] || 'btn-view';
+        }
+
+        function formatDate(dateStr) {
+            const options = { year: 'numeric', month: 'short', day: 'numeric' };
+            return new Date(dateStr).toLocaleDateString('en-US', options);
+        }
+
+        function calculateDaysUntilDue(dueDate) {
+            const today = new Date();
+            const due = new Date(dueDate);
+            const diffTime = due - today;
+            const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+            return diffDays;
+        }
+
+        function renderTrainingList(data) {
+            const listContainer = document.getElementById('trainingList');
+            
+            if (data.length === 0) {
+                listContainer.innerHTML = '<div class="empty-state"><p>No training items found.</p></div>';
+                return;
+            }
+
+            listContainer.innerHTML = data.map(item => {
+                const statusClass = getStatusClass(item.status);
+                const statusLabel = getStatusLabel(item.status);
+                const buttonLabel = getButtonLabel(item.status);
+                const buttonClass = getButtonClass(item.status);
+                const dueFormatted = formatDate(item.dueDate);
+                const lastCompletedStr = item.lastCompleted ? `Last: ${formatDate(item.lastCompleted)}` : 'Not yet completed';
+                const daysUntilDue = calculateDaysUntilDue(item.dueDate);
+                const daysStr = daysUntilDue > 0 ? ` (${daysUntilDue} days)` : '';
+
+                return `
+                    <div class="training-item ${statusClass}">
+                        <div class="training-details">
+                            <h3>${item.name}</h3>
+                            <div class="training-meta">
+                                <span class="training-type">${item.type}</span>
+                                <span>Category: ${item.category}</span>
+                                ${item.score ? `<span>Score: ${item.score}</span>` : ''}
+                            </div>
+                            <div class="training-meta">
+                                <span>${item.description}</span>
+                            </div>
+                        </div>
+                        <div class="training-status">
+                            <div class="status-indicator">
+                                <span class="status-label ${statusClass === 'current' ? 'status-complete' : statusClass === 'warning' ? 'status-due-soon' : statusClass === 'overdue' ? 'status-overdue' : 'status-not-started'}">
+                                    ${statusLabel}
+                                </span>
+                                <span style="font-size: 12px; color: #666;">Due: ${dueFormatted}${daysStr}</span>
+                                <span style="font-size: 11px; color: #999;">${lastCompletedStr}</span>
+                            </div>
+                            <button class="action-button ${buttonClass}">${buttonLabel}</button>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function updateStats() {
+            const completeCount = trainingData.filter(item => item.status === 'current').length;
+            const warningCount = trainingData.filter(item => item.status === 'warning').length;
+            const overdueCount = trainingData.filter(item => item.status === 'overdue').length;
+            const totalCount = trainingData.length;
+
+            document.getElementById('completeCount').textContent = completeCount;
+            document.getElementById('warningCount').textContent = warningCount;
+            document.getElementById('overdueCount').textContent = overdueCount;
+            document.getElementById('totalCount').textContent = totalCount;
+
+            // Update overall status
+            const statusBadge = document.getElementById('overallStatus');
+            if (overdueCount > 0) {
+                statusBadge.textContent = '✗ CRITICAL - OVERDUE ITEMS';
+                statusBadge.className = 'status-badge status-critical';
+            } else if (warningCount > 0) {
+                statusBadge.textContent = '⚠ ACTION REQUIRED';
+                statusBadge.className = 'status-badge status-warning';
+            } else {
+                statusBadge.textContent = '✓ FULLY COMPLIANT';
+                statusBadge.className = 'status-badge status-compliant';
+            }
+        }
+
+        // Event listeners
+        document.getElementById('searchBox').addEventListener('input', (e) => {
+            const searchTerm = e.target.value.toLowerCase();
+            const filterValue = document.getElementById('filterSelect').value;
+            
+            filteredData = trainingData.filter(item => {
+                const matchesSearch = item.name.toLowerCase().includes(searchTerm) ||
+                                     item.category.toLowerCase().includes(searchTerm) ||
+                                     item.description.toLowerCase().includes(searchTerm);
+                const matchesFilter = filterValue === 'all' || item.status === filterValue;
+                return matchesSearch && matchesFilter;
+            });
+
+            renderTrainingList(filteredData);
+        });
+
+        document.getElementById('filterSelect').addEventListener('change', (e) => {
+            const filterValue = e.target.value;
+            const searchTerm = document.getElementById('searchBox').value.toLowerCase();
+
+            filteredData = trainingData.filter(item => {
+                const matchesSearch = item.name.toLowerCase().includes(searchTerm) ||
+                                     item.category.toLowerCase().includes(searchTerm) ||
+                                     item.description.toLowerCase().includes(searchTerm);
+                const matchesFilter = filterValue === 'all' || item.status === filterValue;
+                return matchesSearch && matchesFilter;
+            });
+
+            renderTrainingList(filteredData);
+        });
+
+        // Initial render
+        updateStats();
+        renderTrainingList(filteredData);
+    </script>
+</body>
+</html>
